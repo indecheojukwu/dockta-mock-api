@@ -109,7 +109,86 @@ class AppFixtures extends Fixture
             }
         }
 
-        // 2. Create First Admin (Evans)
+        for ($i = 0; $i < 6; $i++) {
+            $person = new Person();
+            $person->setAge($this->faker->numberBetween(18, 60));
+            $person->setGender($this->faker->randomElement(['male', 'female']));
+            $person->setFirstName($this->faker->firstName);
+            $person->setLastName($this->faker->lastName);
+            $person->setNationalId($this->faker->unique()->numberBetween(10000000, 99999999));
+            $person->setNssfNumber($this->faker->unique()->numberBetween(10000000, 99999999));
+            $person->setPhonenumber($this->faker->phoneNumber);
+            $person->setUsername($this->faker->unique()->userName);
+
+            $manager->persist($person);
+
+            $work_user = new User();
+            $work_user->setEmail($this->faker->unique()->safeEmail);
+            $password = $this->hasher->hashPassword($work_user, 'zeus');
+            $work_user->setPassword($password);
+            $work_user->setPerson($person);
+            $work_user->setPhonenumber($this->faker->phoneNumber);
+            $manager->persist($work_user);
+        }
+
+        $person = new Person();
+        $person->setAge(23);
+        $person->setGender('Male');
+        $person->setFirstName('Evans');
+        $person->setLastName('Indeche');
+        $person->setNationalId($this->faker->numberBetween(100000,1000000));
+        $person->setNssfNumber($this->faker->numberBetween(100000,1000000));
+        $person->setPhonenumber('0720389023');
+        $person->setUsername('obrien');
+        $manager->persist($person);
+
+        $work_user_1 = new User();
+        $work_user_1->setEmail('work.ojukwu.e@gmail.com');
+        $password = $this->hasher->hashPassword($work_user_1, 'zeus');
+        $work_user_1->setPassword($password);
+        $work_user_1->setPerson($person);
+        $work_user_1->setPhonenumber('0720389023');
+        $manager->persist($work_user_1);
+
+        $person2 = new Person();
+        $person2->setAge(23);
+        $person2->setGender('Male');
+        $person2->setFirstName('Winston');
+        $person2->setLastName('Wacieni');
+        $person2->setNationalId($this->faker->numberBetween(100000,1000000));
+        $person2->setNssfNumber($this->faker->numberBetween(100000,1000000));
+        $person2->setPhonenumber('0720389023');
+        $person2->setNssfNumber('1203939');
+        $person2->setUsername('winston');
+        $manager->persist($person2);
+
+        $work_user_2 = new User();
+        $work_user_2->setEmail('work.winston@gmail.com');
+        $password = $this->hasher->hashPassword($work_user_2, 'poseidon');
+        $work_user_2->setPhonenumber('0720389023');
+        $work_user_2->setPassword($password);
+        $work_user_2->setPerson($person2);
+        $manager->persist($work_user_2);
+
+        $person = new Person();
+        $person->setAge(23);
+        $person->setGender('Male');
+        $person->setFirstName('SAM');
+        $person->setLastName('SAM');
+        $person->setNationalId($this->faker->numberBetween(100000,1000000));
+        $person->setNssfNumber($this->faker->numberBetween(100000,1000000));
+        $person->setPhonenumber('0720389023');
+        $person->setUsername('SAM');
+        $manager->persist($person);
+
+        $work_user_3 = new User();
+        $work_user_3->setEmail('work.sam@gmail.com');
+        $work_user_3->setPhonenumber('0720389023');
+        $password = $this->hasher->hashPassword($work_user_3, 'prometheus');
+        $work_user_3->setPassword($password);
+        $work_user_3->setPerson($person);
+        $manager->persist($work_user_3);
+
         $person = new Person();
         $person->setAge(23);
         $person->setGender('Male');
@@ -122,7 +201,7 @@ class AppFixtures extends Fixture
         $manager->persist($person);
 
         $admin_user_1 = new User();
-        $admin_user_1->setEmail('work.ojukwu.e@gmail.com');
+        $admin_user_1->setEmail('i.ojukwu.e@gmail.com');
         $password = $this->hasher->hashPassword($admin_user_1, 'zeus');
         $admin_user_1->setPassword($password);
         $admin_user_1->setPerson($person);
@@ -143,7 +222,7 @@ class AppFixtures extends Fixture
         $manager->persist($person2);
 
         $admin_user_2 = new User();
-        $admin_user_2->setEmail('work.winston@gmail.com');
+        $admin_user_2->setEmail('cloud.winston@gmail.com');
         $password = $this->hasher->hashPassword($admin_user_2, 'poseidon');
         $admin_user_2->setPhonenumber('0720389023');
         $admin_user_2->setPassword($password);
@@ -162,14 +241,12 @@ class AppFixtures extends Fixture
         $manager->persist($person);
 
         $admin_user_3 = new User();
-        $admin_user_3->setEmail('work.sam@gmail.com');
+        $admin_user_3->setEmail('sam@gmail.com');
         $admin_user_3->setPhonenumber('0720389023');
         $password = $this->hasher->hashPassword($admin_user_3, 'prometheus');
         $admin_user_3->setPassword($password);
         $admin_user_3->setPerson($person);
         $manager->persist($admin_user_3);
-
-        $manager->flush();
 
         // FIX: Use the objects we just created directly. No need to query DB.
         $admins = [$admin_user_1, $admin_user_2, $admin_user_3];

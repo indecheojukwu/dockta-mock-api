@@ -17,7 +17,7 @@ class Person
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 15, nullable: true)]
+    #[ORM\Column(length: 25, nullable: true)]
     private ?string $username = null;
 
     #[ORM\Column(length: 15)]
@@ -29,7 +29,7 @@ class Person
     #[ORM\Column(length: 15)]
     private ?string $last_name = null;
 
-    #[ORM\Column(length: 12, nullable: true)]
+    #[ORM\Column(length: 20, nullable: true)]
     private ?string $phonenumber = null;
 
     #[ORM\Column(nullable: true)]
