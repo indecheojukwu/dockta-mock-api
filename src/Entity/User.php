@@ -26,7 +26,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
 
-    #[ORM\Column(length: 180, nullable: true)]
+    #[ORM\Column(length: 50, nullable: true)]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'google_id')]
@@ -96,6 +96,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: PermissionAudit::class, mappedBy: 'target_user')]
     private Collection $targetUserPermissionAudits;
 
+    /**
+     * @var Collection<int, DoctorService>
+     */
+    #[ORM\OneToMany(targetEntity: DoctorService::class, mappedBy: 'doctor')]
+    private Collection $doctorServices;
+
 
     public function __construct() {
         $this->userRoles = new ArrayCollection();
@@ -105,6 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->userRevokedUserRoles = new ArrayCollection();
         $this->permissionAudits = new ArrayCollection();
         $this->targetUserPermissionAudits = new ArrayCollection();
+        $this->doctorServices = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -399,6 +406,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($targetUserPermissionAudit->getTargetUser() === $this) {
                 $targetUserPermissionAudit->setTargetUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DoctorService>
+     */
+    public function getDoctorServices(): Collection
+    {
+        return $this->doctorServices;
+    }
+
+    public function addDoctorService(DoctorService $doctorService): static
+    {
+        if (!$this->doctorServices->contains($doctorService)) {
+            $this->doctorServices->add($doctorService);
+            $doctorService->setDoctor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDoctorService(DoctorService $doctorService): static
+    {
+        if ($this->doctorServices->removeElement($doctorService)) {
+            // set the owning side to null (unless already changed)
+            if ($doctorService->getDoctor() === $this) {
+                $doctorService->setDoctor(null);
             }
         }
 

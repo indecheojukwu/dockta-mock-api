@@ -6,8 +6,11 @@ use App\Entity\Admin\Permission;
 use App\Entity\Admin\Role;
 use App\Entity\Admin\RolePermission;
 use App\Entity\Admin\UserRole;
+use App\Entity\DoctorService;
 use App\Entity\Organization;
+use App\Entity\Patient;
 use App\Entity\Person;
+use App\Entity\Service;
 use App\Entity\User;
 use Faker\Factory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -248,12 +251,11 @@ class AppFixtures extends Fixture
         $admin_user_3->setPerson($person);
         $manager->persist($admin_user_3);
 
-        // FIX: Use the objects we just created directly. No need to query DB.
-        $admins = [$admin_user_1, $admin_user_2, $admin_user_3];
         $admin_super_admins_roles = $manager->getRepository(Role::class)->findBy([
             'name' => ['ROLE_SUPER_ADMIN']
         ]);
 
+        $admins = [$admin_user_1, $admin_user_2, $admin_user_3];
         foreach($admins as $admin){
             foreach($admin_super_admins_roles as $asa){
                 $user_role = new UserRole();
@@ -263,6 +265,72 @@ class AppFixtures extends Fixture
                 $user_role->setRole($asa);
                 $manager->persist($user_role);
             }
+        }
+
+        $manager->flush();
+
+        $services = [
+            ['name' => 'General Consultation', 'code' => 'CONSULT', 'description' => 'General medical consultation', 'price' => 5000],
+            ['name' => 'Cardiology Checkup', 'code' => 'CARDIO', 'description' => 'Heart and cardiovascular system checkup', 'price' => 15000],
+            ['name' => 'Dental Checkup', 'code' => 'DENTAL', 'description' => 'Dental examination and cleaning', 'price' => 8000],
+            ['name' => 'Eye Examination', 'code' => 'EYE', 'description' => 'Vision and eye health examination', 'price' => 7000],
+            ['name' => 'Orthopedic Consultation', 'code' => 'ORTHO', 'description' => 'Bone and joint consultation', 'price' => 12000],
+            ['name' => 'Pediatric Checkup', 'code' => 'PEDIA', 'description' => 'Child health checkup', 'price' => 6000],
+            ['name' => 'Laboratory Test', 'code' => 'LAB', 'description' => 'Various laboratory tests', 'price' => 3000],
+            ['name' => 'X-Ray Scan', 'code' => 'XRAY', 'description' => 'X-ray imaging services', 'price' => 10000],
+            ['name' => 'Ultrasound Scan', 'code' => 'ULTRA', 'description' => 'Ultrasound diagnostic services', 'price' => 9000],
+            ['name' => 'Physical Therapy', 'code' => 'PT', 'description' => 'Physiotherapy sessions', 'price' => 8000],
+            ['name' => 'Vaccination', 'code' => 'VAX', 'description' => 'Vaccination services', 'price' => 2000],
+            ['name' => 'Mental Health Consultation', 'code' => 'MENTAL', 'description' => 'Psychiatric and counseling services', 'price' => 11000],
+        ];
+
+        $serviceEntities = [];
+        foreach ($services as $data) {
+            $service = new Service();
+            $service->setName($data['name']);
+            $service->setCode($data['code']);
+            $service->setDescription($data['description']);
+            $service->setPrice($data['price']);
+            $manager->persist($service);
+            $serviceEntities[] = $service;
+        }
+
+        $manager->flush();
+
+        $patients = [];
+        $bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+        for ($i = 0; $i < 15; $i++) {
+            $patient = new Patient();
+            $patient->setFullName($this->faker->name);
+            $patient->setDateAdmitted($this->faker->dateTimeBetween('-6 months', 'now'));
+            $patient->setPatientNumber('#PTNT-00' . $i);
+            $patient->setIsMale($this->faker->boolean);
+            $patient->setBloodgroup($this->faker->randomElement($bloodGroups));
+            $patient->setDateOfBirth($this->faker->dateTimeBetween('-50 years', '-18 years'));
+            $patient->setAddress($this->faker->address);
+            $patient->setEmail($this->faker->safeEmail);
+            $patient->setPhonenumber($this->faker->phoneNumber);
+            $manager->persist($patient);
+            $patients[] = $patient;
+        }
+
+        $manager->flush();
+
+        $excludedIds = ['i.ojukwu.e@gmail.com', 'cloud.winston@gmail.com', 'sam@gmail.com'];
+        $doctors = $manager->getRepository(User::class)->createQueryBuilder('u')->where('u.email IN (:excludedIds)')->setParameter('excludedIds', $excludedIds)->getQuery()->getResult();
+        $count = 0;
+        for ($i = 0; $i < 20; $i++) {
+            if (empty($doctors)) {
+                break;
+            }
+
+            $doctorService = new DoctorService();
+            $doctorService->setService($this->faker->randomElement($serviceEntities));
+            $doctorService->setDoctor($this->faker->randomElement($doctors));
+            $doctorService->setPatient($this->faker->randomElement($patients));
+            $doctorService->setNotes([ $this->faker->sentence ]);
+            $manager->persist($doctorService);
+            $count++;
         }
 
         $manager->flush();
