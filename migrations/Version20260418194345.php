@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260416164646 extends AbstractMigration
+final class Version20260418194345 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,7 +21,7 @@ final class Version20260416164646 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE doctor_service (id INT AUTO_INCREMENT NOT NULL, notes JSON DEFAULT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, service_id INT DEFAULT NULL, doctor_id INT DEFAULT NULL, patient_id INT DEFAULT NULL, INDEX IDX_7230F97FED5CA9E6 (service_id), INDEX IDX_7230F97F87F4FB17 (doctor_id), INDEX IDX_7230F97F6B899279 (patient_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
-        $this->addSql('CREATE TABLE patient (id INT AUTO_INCREMENT NOT NULL, full_name VARCHAR(65) NOT NULL, date_admitted DATETIME NOT NULL, is_male TINYINT NOT NULL, bloodgroup VARCHAR(5) DEFAULT NULL, date_of_birth DATE DEFAULT NULL, address LONGTEXT DEFAULT NULL, email VARCHAR(50) DEFAULT NULL, phonenumber VARCHAR(25) DEFAULT NULL, patient_number VARCHAR(20) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
+        $this->addSql('CREATE TABLE patient (id INT AUTO_INCREMENT NOT NULL, full_name VARCHAR(65) NOT NULL, date_admitted DATETIME NOT NULL, is_male TINYINT NOT NULL, blood_group VARCHAR(5) DEFAULT NULL, date_of_birth DATE DEFAULT NULL, address LONGTEXT DEFAULT NULL, email VARCHAR(50) DEFAULT NULL, phonenumber VARCHAR(25) DEFAULT NULL, patient_number VARCHAR(20) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
         $this->addSql('CREATE TABLE permission (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(100) NOT NULL, type VARCHAR(20) DEFAULT NULL, module VARCHAR(50) NOT NULL, action VARCHAR(50) NOT NULL, is_active TINYINT NOT NULL, is_deleted TINYINT NOT NULL, description LONGTEXT DEFAULT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
         $this->addSql('CREATE TABLE permission_audit (id INT AUTO_INCREMENT NOT NULL, permission_granted INT DEFAULT NULL, permission_denied INT DEFAULT NULL, action_by INT DEFAULT NULL, target_user INT NOT NULL, INDEX IDX_449F920ADC80C46A (permission_granted), INDEX IDX_449F920A7405F905 (permission_denied), INDEX IDX_449F920A1DC04527 (action_by), INDEX IDX_449F920A408BC0F8 (target_user), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');
         $this->addSql('CREATE TABLE person (id INT AUTO_INCREMENT NOT NULL, username VARCHAR(25) DEFAULT NULL, first_name VARCHAR(15) NOT NULL, middle_name VARCHAR(15) DEFAULT NULL, last_name VARCHAR(15) NOT NULL, phonenumber VARCHAR(20) DEFAULT NULL, age INT DEFAULT NULL, gender VARCHAR(8) DEFAULT NULL, national_id INT DEFAULT NULL, nssf_number INT DEFAULT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci`');

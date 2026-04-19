@@ -28,7 +28,7 @@ class Patient
     private ?bool $is_male = null;
 
     #[ORM\Column(length: 5, nullable: true)]
-    private ?string $bloodgroup = null;
+    private ?string $blood_group = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $date_of_birth = null;
@@ -99,12 +99,12 @@ class Patient
 
     public function getBloodgroup(): ?string
     {
-        return $this->bloodgroup;
+        return $this->blood_group;
     }
 
-    public function setBloodgroup(?string $bloodgroup): static
+    public function setBloodgroup(?string $blood_group): static
     {
-        $this->bloodgroup = $bloodgroup;
+        $this->blood_group = $blood_group;
 
         return $this;
     }
