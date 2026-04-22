@@ -2,7 +2,6 @@
 
 namespace App\Controller\API;
 
-use App\Entity\Organization;
 use App\Entity\Patient;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -31,7 +30,7 @@ class PatientController extends AbstractController
         $this->tokenStorageInterface = $tokenStorageInterface;
     }
 
-    #[Route(path: '/api/get/patient/data', name: 'app_get_patient_details', methods: ['GET'])]
+    #[Route(path: '/mock-api/get/patient/data', name: 'app_get_patient_details', methods: ['GET'])]
     public function get_patient_details(Request $request): JsonResponse {
 
         $search_criteria = $request->query->get('search_criteria');

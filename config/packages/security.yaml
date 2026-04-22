@@ -72,6 +72,9 @@ security:
         - { path: ^/login, role: PUBLIC_ACCESS }
         - { path: ^/signin, role: PUBLIC_ACCESS }
 
+        # SANITAS DOES NOT HAVE JWT's SO>>>>>>>>>
+        - { path: ^/mock-api, role: PUBLIC_ACCESS }
+
         - { path: ^/api/register_user, roles: PUBLIC_ACCESS, methods: ['OPTIONS', 'POST'] }
         - { path: ^/api/login_check, roles: PUBLIC_ACCESS, methods: ['OPTIONS'] }
         - { path: ^/api/(login|token/refresh), roles: PUBLIC_ACCESS }
