@@ -102,6 +102,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: DoctorService::class, mappedBy: 'doctor')]
     private Collection $doctorServices;
 
+    /**
+     * @var Collection<int, PatientService>
+     */
+    #[ORM\OneToMany(targetEntity: PatientService::class, mappedBy: 'user')]
+    private Collection $patientServices;
+
+    /**
+     * @var Collection<int, Invoice>
+     */
+    #[ORM\OneToMany(targetEntity: Invoice::class, mappedBy: 'created_by')]
+    private Collection $invoices;
 
     public function __construct() {
         $this->userRoles = new ArrayCollection();
@@ -112,6 +123,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->permissionAudits = new ArrayCollection();
         $this->targetUserPermissionAudits = new ArrayCollection();
         $this->doctorServices = new ArrayCollection();
+        $this->patientServices = new ArrayCollection();
+        $this->invoices = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -441,4 +454,65 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, PatientService>
+     */
+    public function getPatientServices(): Collection
+    {
+        return $this->patientServices;
+    }
+
+    public function addPatientService(PatientService $patientService): static
+    {
+        if (!$this->patientServices->contains($patientService)) {
+            $this->patientServices->add($patientService);
+            $patientService->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePatientService(PatientService $patientService): static
+    {
+        if ($this->patientServices->removeElement($patientService)) {
+            // set the owning side to null (unless already changed)
+            if ($patientService->getUser() === $this) {
+                $patientService->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invoice>
+     */
+    public function getInvoices(): Collection
+    {
+        return $this->invoices;
+    }
+
+    public function addInvoice(Invoice $invoice): static
+    {
+        if (!$this->invoices->contains($invoice)) {
+            $this->invoices->add($invoice);
+            $invoice->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvoice(Invoice $invoice): static
+    {
+        if ($this->invoices->removeElement($invoice)) {
+            // set the owning side to null (unless already changed)
+            if ($invoice->getCreatedBy() === $this) {
+                $invoice->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

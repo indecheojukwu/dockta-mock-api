@@ -30,12 +30,12 @@ class PatientController extends AbstractController
         $this->tokenStorageInterface = $tokenStorageInterface;
     }
 
-    #[Route(path: '/mock-api/get/patient/data', name: 'app_get_patient_details', methods: ['GET'])]
-    public function get_patient_details(Request $request): JsonResponse {
+    #[Route(path: '/mock-api/get/{org_user_id}/patient/data', name: 'app_get_patient_details', methods: ['GET'])]
+    public function get_patient_details(Request $request, int $org_user_id): JsonResponse {
 
         $search_criteria = $request->query->get('search_criteria');
 
-        $patient = $this->manager->getRepository(Patient::class)->fetchPatientRecords($search_criteria);
+        $patient = $this->manager->getRepository(Patient::class)->fetchPatientRecords($search_criteria, $org_user_id);
 
         return new JsonResponse($patient);
     }

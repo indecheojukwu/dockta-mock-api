@@ -7,8 +7,11 @@ use App\Entity\Admin\Role;
 use App\Entity\Admin\RolePermission;
 use App\Entity\Admin\UserRole;
 use App\Entity\DoctorService;
-use App\Entity\Organization;
+use App\Entity\Invoice;
+use App\Entity\InvoiceItem;
 use App\Entity\Patient;
+use App\Entity\PatientService;
+use App\Entity\Payment;
 use App\Entity\Person;
 use App\Entity\Service;
 use App\Entity\User;
@@ -110,28 +113,6 @@ class AppFixtures extends Fixture
                     }
                 }
             }
-        }
-
-        for ($i = 0; $i < 6; $i++) {
-            $person = new Person();
-            $person->setAge($this->faker->numberBetween(18, 60));
-            $person->setGender($this->faker->randomElement(['male', 'female']));
-            $person->setFirstName($this->faker->firstName);
-            $person->setLastName($this->faker->lastName);
-            $person->setNationalId($this->faker->unique()->numberBetween(10000000, 99999999));
-            $person->setNssfNumber($this->faker->unique()->numberBetween(10000000, 99999999));
-            $person->setPhonenumber($this->faker->phoneNumber);
-            $person->setUsername($this->faker->unique()->userName);
-
-            $manager->persist($person);
-
-            $work_user = new User();
-            $work_user->setEmail($this->faker->unique()->safeEmail);
-            $password = $this->hasher->hashPassword($work_user, 'zeus');
-            $work_user->setPassword($password);
-            $work_user->setPerson($person);
-            $work_user->setPhonenumber($this->faker->phoneNumber);
-            $manager->persist($work_user);
         }
 
         $person = new Person();
@@ -299,7 +280,7 @@ class AppFixtures extends Fixture
 
         $patients = [];
         $bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-        for ($i = 0; $i < 15; $i++) {
+        for ($i = 0; $i < 7; $i++) {
             $patient = new Patient();
             $patient->setFullName($this->faker->name);
             $patient->setDateAdmitted($this->faker->dateTimeBetween('-6 months', 'now'));
@@ -316,10 +297,9 @@ class AppFixtures extends Fixture
 
         $manager->flush();
 
-        $excludedIds = ['i.ojukwu.e@gmail.com', 'cloud.winston@gmail.com', 'sam@gmail.com'];
-        $doctors = $manager->getRepository(User::class)->createQueryBuilder('u')->where('u.email IN (:excludedIds)')->setParameter('excludedIds', $excludedIds)->getQuery()->getResult();
+        $doctors = $manager->getRepository(User::class)->findAll();
         $count = 0;
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             if (empty($doctors)) {
                 break;
             }
@@ -331,6 +311,84 @@ class AppFixtures extends Fixture
             $doctorService->setNotes([ $this->faker->sentence ]);
             $manager->persist($doctorService);
             $count++;
+        }
+
+        $manager->flush();
+
+        for ($i = 0; $i < 20; $i++) {
+            $hasInsurance = $this->faker->boolean;
+            $unitPrice = (string) $this->faker->numberBetween(1000, 50000);
+            $quantity = $this->faker->numberBetween(1, 5);
+            $totalAmount = (string) ((int) $unitPrice * $quantity);
+
+            $patientService = new PatientService();
+            $patientService->setPatient($this->faker->randomElement($patients));
+            $patientService->setService($this->faker->randomElement($serviceEntities));
+            $patientService->setUser($this->faker->randomElement($doctors));
+            $patientService->setPerfomedAt($this->faker->dateTimeBetween('-6 months', 'now'));
+            $patientService->setNotes($this->faker->optional()->sentence);
+            $patientService->setUnitPrice($unitPrice);
+            $patientService->setTotalAmount($totalAmount);
+            $patientService->setHasInsurance($hasInsurance);
+            $manager->persist($patientService);
+        }
+
+        $manager->flush();
+
+        $patientServices = $manager->getRepository(PatientService::class)->findAll();
+
+        for ($i = 0; $i < 15; $i++) {
+            $invoice = new Invoice();
+            $invoice->setInvoiceNumber('INV-' . str_pad($i + 1, 5, '0', STR_PAD_LEFT));
+            $invoice->setPatient($this->faker->randomElement($patients));
+            $invoice->setCreatedBy($this->faker->randomElement($doctors));
+            $invoice->setInvoiceDate($this->faker->dateTimeBetween('-6 months', 'now'));
+            $invoice->setDueDate($this->faker->dateTimeBetween('now', '+1 month'));
+            $invoice->setSubtotal((string) $this->faker->numberBetween(5000, 100000));
+            $invoice->setTaxAmount((string) $this->faker->numberBetween(500, 10000));
+            $invoice->setTotalAmount((string) ($invoice->getSubtotal() + $invoice->getTaxAmount()));
+            $invoice->setStatus($this->faker->randomElement(['draft', 'issued', 'partially_paid', 'paid', 'cancelled']));
+            $invoice->setNotes($this->faker->optional()->sentence);
+            $manager->persist($invoice);
+        }
+
+        $manager->flush();
+
+        $invoices = $manager->getRepository(Invoice::class)->findAll();
+
+        for ($i = 0; $i < 40; $i++) {
+
+            $invoice = $this->faker->randomElement($invoices);
+
+            $invoiceItem = new InvoiceItem();
+            $invoiceItem->setPatientService($this->faker->randomElement($patientServices));
+            $invoiceItem->setService($this->faker->randomElement($serviceEntities));
+            $invoiceItem->setInvoice($invoice);
+            $invoiceItem->setDescription($this->faker->sentence(3));
+            $invoiceItem->setUnitPrice((string) $this->faker->numberBetween(1000, 50000));
+            $invoiceItem->setTotal((string) ($invoiceItem->getUnitPrice() * $this->faker->numberBetween(1, 5)));
+            $invoiceItem->setInsuranceCoveredAmount((string) $this->faker->numberBetween(0, (int) $invoiceItem->getTotal()));
+            $invoiceItem->setPatientPayableAmount((string) ((int) $invoiceItem->getTotal() - (int) $invoiceItem->getInsuranceCoveredAmount()));
+            $manager->persist($invoiceItem);
+        }
+
+        $manager->flush();
+
+        $paymentMethods = ['cash', 'card', 'mobile_money', 'insurance'];
+        $paidByOptions = ['patient', 'insurance'];
+
+        for ($i = 0; $i < 15; $i++) {
+            $paidBy = $this->faker->randomElement($paidByOptions);
+
+            $payment = new Payment();
+            $payment->setInvoice($invoices[$i]);
+            $payment->setAmount($invoice->getTotalAmount());
+            $payment->setPaymentMethod($this->faker->randomElement($paymentMethods));
+            $payment->setPaidBy($paidBy);
+            $payment->setTransactionReference('TXN-' . $this->faker->numberBetween(1000, 10000));
+            $payment->setPaidAt($this->faker->dateTimeBetween($invoice->getInvoiceDate(), 'now'));
+            $payment->setNotes($this->faker->optional()->sentence);
+            $manager->persist($payment);
         }
 
         $manager->flush();

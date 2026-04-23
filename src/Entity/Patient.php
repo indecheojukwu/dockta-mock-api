@@ -51,9 +51,23 @@ class Patient
     #[ORM\Column(length: 20)]
     private ?string $patient_number = null;
 
+    /**
+     * @var Collection<int, PatientService>
+     */
+    #[ORM\OneToMany(targetEntity: PatientService::class, mappedBy: 'patientt')]
+    private Collection $patientServices;
+
+    /**
+     * @var Collection<int, Invoice>
+     */
+    #[ORM\OneToMany(targetEntity: Invoice::class, mappedBy: 'patient')]
+    private Collection $invoices;
+
     public function __construct()
     {
         $this->doctorServices = new ArrayCollection();
+        $this->patientServices = new ArrayCollection();
+        $this->invoices = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -198,4 +212,65 @@ class Patient
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, PatientService>
+     */
+    public function getPatientServices(): Collection
+    {
+        return $this->patientServices;
+    }
+
+    public function addPatientService(PatientService $patientService): static
+    {
+        if (!$this->patientServices->contains($patientService)) {
+            $this->patientServices->add($patientService);
+            $patientService->setPatientt($this);
+        }
+
+        return $this;
+    }
+
+    public function removePatientService(PatientService $patientService): static
+    {
+        if ($this->patientServices->removeElement($patientService)) {
+            // set the owning side to null (unless already changed)
+            if ($patientService->getPatientt() === $this) {
+                $patientService->setPatientt(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invoice>
+     */
+    public function getInvoices(): Collection
+    {
+        return $this->invoices;
+    }
+
+    public function addInvoice(Invoice $invoice): static
+    {
+        if (!$this->invoices->contains($invoice)) {
+            $this->invoices->add($invoice);
+            $invoice->setPatient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvoice(Invoice $invoice): static
+    {
+        if ($this->invoices->removeElement($invoice)) {
+            // set the owning side to null (unless already changed)
+            if ($invoice->getPatient() === $this) {
+                $invoice->setPatient(null);
+            }
+        }
+
+        return $this;
+    }
+
 }
