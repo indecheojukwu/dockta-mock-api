@@ -335,6 +335,23 @@ class AppFixtures extends Fixture
 
         $manager->flush();
 
+        $targetPatient = $patients[0];
+        $targetDoctor = $manager->getRepository(User::class)->findOneBy(['email' => 'work.ojukwu.e@gmail.com']);
+        for ($s = 0; $s < 3; $s++) {
+            $patientService = new PatientService();
+            $patientService->setPatient($targetPatient);
+            $patientService->setService($serviceEntities[$s]);
+            $patientService->setUser($targetDoctor);
+            $patientService->setPerfomedAt($this->faker->dateTimeBetween('-6 months', 'now'));
+            $patientService->setNotes($this->faker->optional()->sentence);
+            $patientService->setUnitPrice((string) $this->faker->numberBetween(1000, 50000));
+            $patientService->setTotalAmount((string) ((int) $patientService->getUnitPrice() * $this->faker->numberBetween(1, 5)));
+            $patientService->setHasInsurance($this->faker->boolean);
+            $manager->persist($patientService);
+        }
+
+        $manager->flush();
+
         $patientServices = $manager->getRepository(PatientService::class)->findAll();
 
         for ($i = 0; $i < 15; $i++) {
